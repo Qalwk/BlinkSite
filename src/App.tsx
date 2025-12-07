@@ -418,7 +418,7 @@ function App() {
             <div className="problem-grid">
               <div className="problem-card">
                 <span className="problem-icon">😮‍💨</span>
-                <p>Устаёшь, даже если работаешь 8+ часов?</p>
+                <p>Устаёшь, даже если работаешь меньше 4 часов?</p>
               </div>
               <div className="problem-card">
                 <span className="problem-icon">⏱️</span>
