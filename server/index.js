@@ -12,7 +12,7 @@ const PORT = process.env.PORT || 3001
 const allowedOrigins = [
   'http://localhost:5173',            // Локальная разработка Vite
   'http://localhost:3000',            // Альтернативный локальный порт
-  process.env.FRONTEND_URL            // Продакшн URL (добавьте в переменные окружения)
+  process.env.VITE_API_URL          // Продакшн URL (добавьте в переменные окружения)
 ].filter(Boolean)
 
 // Middleware
