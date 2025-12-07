@@ -368,7 +368,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   font-weight: 700;
   background: conic-gradient(var(--color-primary) 87%, rgba(255, 255, 255, 0.1) 0);
   position: relative;
@@ -388,8 +388,8 @@
 }
 
 .metric-label {
-  font-size: 1rem;
-  color: var(--color-gray);
+  font-size: 1.2rem;
+  color: var(--color-white);
 }
 
 .mockup-status {
@@ -674,7 +674,7 @@
 .step-number {
   font-size: 3rem;
   font-weight: 800;
-  color: rgba(178, 241, 66, 0.2);
+  color: var(--color-primary);
   line-height: 1;
 }
 
@@ -960,8 +960,9 @@
 .quiz-result-stats {
   display: flex;
   justify-content: center;
-  gap: 48px;
+  gap: 32px;
   margin-bottom: 32px;
+  flex-wrap: wrap;
 }
 
 .result-stat {
@@ -986,6 +987,59 @@
   gap: 16px;
   justify-content: center;
   flex-wrap: wrap;
+}
+
+/* Уровни результатов квиза */
+.quiz-result-green .quiz-result-icon {
+  animation: pulse-green 2s infinite;
+}
+
+.quiz-result-green h2 {
+  color: #4ade80;
+}
+
+.quiz-result-yellow .quiz-result-icon {
+  animation: pulse-yellow 2s infinite;
+}
+
+.quiz-result-yellow h2 {
+  color: #fbbf24;
+}
+
+.quiz-result-orange .quiz-result-icon {
+  animation: pulse-orange 2s infinite;
+}
+
+.quiz-result-orange h2 {
+  color: #fb923c;
+}
+
+.quiz-result-red .quiz-result-icon {
+  animation: pulse-red 2s infinite;
+}
+
+.quiz-result-red h2 {
+  color: #f87171;
+}
+
+@keyframes pulse-green {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); filter: drop-shadow(0 0 20px rgba(74, 222, 128, 0.5)); }
+}
+
+@keyframes pulse-yellow {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); filter: drop-shadow(0 0 20px rgba(251, 191, 36, 0.5)); }
+}
+
+@keyframes pulse-orange {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); filter: drop-shadow(0 0 20px rgba(251, 146, 60, 0.5)); }
+}
+
+@keyframes pulse-red {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); filter: drop-shadow(0 0 20px rgba(248, 113, 113, 0.5)); }
 }
 
 @media (max-width: 576px) {
@@ -1163,6 +1217,17 @@ select {
 
 .btn-full {
   width: 100%;
+}
+
+.form-error {
+  text-align: center;
+  font-size: 0.9rem;
+  color: #ff6b6b;
+  background: rgba(255, 107, 107, 0.1);
+  border: 1px solid rgba(255, 107, 107, 0.3);
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 16px;
 }
 
 .form-note {

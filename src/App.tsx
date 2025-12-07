@@ -59,6 +59,7 @@ function App() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    telegram: '',
     profession: '',
     os: '',
     motivation: ''
@@ -69,34 +70,146 @@ function App() {
   const [showQuizResult, setShowQuizResult] = useState(false)
   const [openFaq, setOpenFaq] = useState<number | null>(null)
   const [formSubmitted, setFormSubmitted] = useState(false)
+  const [formLoading, setFormLoading] = useState(false)
+  const [formError, setFormError] = useState('')
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setFormSubmitted(true)
+    setFormLoading(true)
+    setFormError('')
+
+    try {
+      const response = await fetch('/api/send-form', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        setFormSubmitted(true)
+      } else {
+        setFormError(data.error || 'Произошла ошибка при отправке')
+      }
+    } catch (error) {
+      console.error('Ошибка отправки формы:', error)
+      setFormError('Не удалось отправить заявку. Попробуйте позже.')
+    } finally {
+      setFormLoading(false)
+    }
   }
 
+  // Система подсчёта баллов для квиза
+  // Каждый ответ имеет "вес" - чем выше балл, тем больше потенциал улучшения с BlinkMind
   const quizQuestions = [
     {
       question: 'Кем ты работаешь?',
-      options: ['Разработчик', 'Дизайнер', 'Студент', 'Фрилансер', 'Менеджер', 'Другое']
+      options: [
+        { text: 'Разработчик', points: 3 },      // Высокая когнитивная нагрузка
+        { text: 'Дизайнер', points: 3 },         // Визуальная работа, усталость глаз
+        { text: 'Студент', points: 2 },          // Долгие сессии обучения
+        { text: 'Фрилансер', points: 3 },        // Нет чёткого графика, риск переработки
+        { text: 'Менеджер', points: 2 },         // Много переключений внимания
+        { text: 'Другое', points: 1 }            // Неизвестная специфика
+      ]
     },
     {
       question: 'Сколько часов в день проводишь за компьютером?',
-      options: ['Менее 4 часов', '4-6 часов', '6-8 часов', '8-10 часов', 'Более 10 часов']
+      options: [
+        { text: 'Менее 4 часов', points: 1 },    // Низкий риск усталости
+        { text: '4-6 часов', points: 2 },        // Умеренная нагрузка
+        { text: '6-8 часов', points: 3 },        // Стандартный рабочий день
+        { text: '8-10 часов', points: 4 },       // Повышенная нагрузка
+        { text: 'Более 10 часов', points: 5 }    // Критическая нагрузка
+      ]
     },
     {
       question: 'Как часто чувствуешь усталость или выгорание?',
-      options: ['Редко', 'Иногда', 'Часто', 'Почти каждый день']
+      options: [
+        { text: 'Редко', points: 1 },            // Хорошее состояние
+        { text: 'Иногда', points: 2 },           // Умеренные проблемы
+        { text: 'Часто', points: 4 },            // Серьёзные проблемы
+        { text: 'Почти каждый день', points: 5 } // Критическое состояние
+      ]
     },
     {
       question: 'Что больше всего мешает продуктивности?',
-      options: ['Отвлечения', 'Усталость', 'Прокрастинация', 'Нет чёткого плана', 'Всё вместе']
+      options: [
+        { text: 'Отвлечения', points: 3 },       // Проблема с фокусом
+        { text: 'Усталость', points: 4 },        // Проблема с энергией
+        { text: 'Прокрастинация', points: 3 },   // Проблема с мотивацией
+        { text: 'Нет чёткого плана', points: 2 },// Проблема с организацией
+        { text: 'Всё вместе', points: 5 }        // Комплексная проблема
+      ]
     }
   ]
+
+  // Функция подсчёта результатов квиза
+  const calculateQuizResult = (answers: string[]) => {
+    let totalPoints = 0
+    
+    // Считаем общие баллы
+    answers.forEach((answer, questionIndex) => {
+      const question = quizQuestions[questionIndex]
+      const selectedOption = question.options.find(opt => opt.text === answer)
+      if (selectedOption) {
+        totalPoints += selectedOption.points
+      }
+    })
+
+    // Максимум баллов: 3 + 5 + 5 + 5 = 18
+    // Минимум баллов: 1 + 1 + 1 + 2 = 5
+    
+    // Определяем уровень и персонализированный результат
+    if (totalPoints <= 7) {
+      return {
+        level: 'green',
+        title: 'Ты в хорошей форме! 💚',
+        description: 'У тебя неплохой баланс, но даже небольшая оптимизация может дать заметный результат.',
+        productivityGain: '15-25%',
+        timeSaved: '~45 мин',
+        fatigueReduction: '-30%',
+        emoji: '🌱'
+      }
+    } else if (totalPoints <= 11) {
+      return {
+        level: 'yellow',
+        title: 'Есть потенциал для роста 💛',
+        description: 'Ты справляешься, но работаешь не в полную силу. BlinkMind поможет найти твой оптимальный ритм.',
+        productivityGain: '30-45%',
+        timeSaved: '~1 час',
+        fatigueReduction: '-50%',
+        emoji: '⚡'
+      }
+    } else if (totalPoints <= 15) {
+      return {
+        level: 'orange',
+        title: 'Пора что-то менять 🧡',
+        description: 'Твой мозг работает на износ. Умное управление энергией может кардинально изменить ситуацию.',
+        productivityGain: '40-60%',
+        timeSaved: '~2 часа',
+        fatigueReduction: '-70%',
+        emoji: '🔥'
+      }
+    } else {
+      return {
+        level: 'red',
+        title: 'Срочно нужна помощь ❤️',
+        description: 'Ты на грани выгорания. BlinkMind поможет восстановить баланс и вернуть продуктивность без жертв.',
+        productivityGain: '60-80%',
+        timeSaved: '~3 часа',
+        fatigueReduction: '-85%',
+        emoji: '🚀'
+      }
+    }
+  }
 
   const handleQuizAnswer = (answer: string) => {
     const newAnswers = [...quizAnswers, answer]
@@ -358,7 +471,7 @@ function App() {
               <div className="step-number">01</div>
               <div className="step-content">
                 <h3>Включи камеру</h3>
-                <p>Просто разреши доступ к веб-камере. Видео не записывается и никуда не передаётся.</p>
+                <p>Всё работает локально — видео не записывается и не передаётся куда-либо.</p>
               </div>
               <div className="step-visual">
                 <div className="step-icon">📸</div>
@@ -368,7 +481,7 @@ function App() {
               <div className="step-number">02</div>
               <div className="step-content">
                 <h3>Работай как обычно</h3>
-                <p>BlinkMind незаметно анализирует микросигналы: моргания, мимику, позу — и определяет твоё состояние.</p>
+                <p>BlinkMind анализирует микросигналы: моргания, мимику, позу — и определяет твоё состояние в реальном времени.</p>
               </div>
               <div className="step-visual">
                 <div className="step-icon">🧠</div>
@@ -377,8 +490,8 @@ function App() {
             <div className="step">
               <div className="step-number">03</div>
               <div className="step-content">
-                <h3>Получай подсказки</h3>
-                <p>Умные уведомления подскажут, когда пора сделать паузу, а когда ты на пике концентрации.</p>
+                <h3>Получай умные подсказки</h3>
+                <p>Система уведомлений работает в режиме онлайн: подскажет, когда сделать паузу, заварить чай или размяться.</p>
               </div>
               <div className="step-visual">
                 <div className="step-icon">💡</div>
@@ -457,41 +570,51 @@ function App() {
                       <button 
                         key={index}
                         className="quiz-option"
-                        onClick={() => handleQuizAnswer(option)}
+                        onClick={() => handleQuizAnswer(option.text)}
                       >
-                        {option}
+                        {option.text}
                       </button>
                     ))}
                   </div>
                 </div>
               </>
             ) : (
-              <div className="quiz-result">
-                <span className="quiz-result-icon">📊</span>
-                <h2>Твой результат</h2>
-                <p className="quiz-result-text">
-                  Судя по ответам, ты мог бы <span className="highlight">повысить продуктивность на 40-60%</span>, 
-                  если бы работал в согласии с ритмом мозга, а не против него.
-                </p>
-                <div className="quiz-result-stats">
-                  <div className="result-stat">
-                    <span className="result-value">~2ч</span>
-                    <span className="result-label">Экономия времени в день</span>
+              (() => {
+                const result = calculateQuizResult(quizAnswers)
+                return (
+                  <div className={`quiz-result quiz-result-${result.level}`}>
+                    <span className="quiz-result-icon">{result.emoji}</span>
+                    <h2>{result.title}</h2>
+                    <p className="quiz-result-text">
+                      {result.description}
+                      {' '}
+                      <span className="highlight">Потенциал роста: +{result.productivityGain}</span>
+                    </p>
+                    <div className="quiz-result-stats">
+                      <div className="result-stat">
+                        <span className="result-value">{result.timeSaved}</span>
+                        <span className="result-label">Экономия времени в день</span>
+                      </div>
+                      <div className="result-stat">
+                        <span className="result-value">{result.fatigueReduction}</span>
+                        <span className="result-label">Меньше усталости</span>
+                      </div>
+                      <div className="result-stat">
+                        <span className="result-value">+{result.productivityGain}</span>
+                        <span className="result-label">Рост продуктивности</span>
+                      </div>
+                    </div>
+                    <div className="quiz-result-buttons">
+                      <button className="btn btn-primary" onClick={scrollToForm}>
+                        Записаться на бета-тест
+                      </button>
+                      <button className="btn btn-secondary" onClick={resetQuiz}>
+                        Пройти снова
+                      </button>
+                    </div>
                   </div>
-                  <div className="result-stat">
-                    <span className="result-value">-70%</span>
-                    <span className="result-label">Меньше усталости</span>
-                  </div>
-                </div>
-                <div className="quiz-result-buttons">
-                  <button className="btn btn-primary" onClick={scrollToForm}>
-                    Записаться на бета-тест
-                  </button>
-                  <button className="btn btn-secondary" onClick={resetQuiz}>
-                    Пройти снова
-                  </button>
-                </div>
-              </div>
+                )
+              })()
             )}
           </div>
         </div>
@@ -566,6 +689,17 @@ function App() {
                       required
                     />
                   </div>
+                  <div className="form-group">
+                    <label htmlFor="telegram">Telegram</label>
+                    <input 
+                      type="text" 
+                      id="telegram" 
+                      name="telegram" 
+                      placeholder="@username"
+                      value={formData.telegram}
+                      onChange={handleInputChange}
+                    />
+                  </div>
                   <div className="form-row">
                     <div className="form-group">
                       <label htmlFor="profession">Род деятельности</label>
@@ -612,9 +746,16 @@ function App() {
                       onChange={handleInputChange}
                     ></textarea>
                   </div>
-                  <button type="submit" className="btn btn-primary btn-full">
-                    Отправить заявку
-                    <span className="btn-arrow">→</span>
+                  {formError && (
+                    <p className="form-error">{formError}</p>
+                  )}
+                  <button 
+                    type="submit" 
+                    className="btn btn-primary btn-full"
+                    disabled={formLoading}
+                  >
+                    {formLoading ? 'Отправка...' : 'Отправить заявку'}
+                    {!formLoading && <span className="btn-arrow">→</span>}
                   </button>
                   <p className="form-note">
                     Мы свяжемся в течение 24 часов. Места ограничены!
@@ -681,7 +822,7 @@ function App() {
               <span className="logo-icon">◉</span>
               <span>BlinkMind</span>
             </a>
-            <p>Интеллектуальный ассистент продуктивности</p>
+            <p>Твой личный ассистент продуктивности</p>
           </div>
           <div className="footer-links">
             <a href="#features">Возможности</a>
