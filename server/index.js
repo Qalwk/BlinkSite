@@ -12,7 +12,10 @@ const PORT = process.env.PORT || 3001
 const allowedOrigins = [
   'http://localhost:5173',            // Локальная разработка Vite
   'http://localhost:3000',            // Альтернативный локальный порт
-  process.env.VITE_API_URL          // Продакшн URL (добавьте в переменные окружения)
+  process.env.FRONTEND_URL,           // Продакшн URL из Railway
+  'https://blinkmind.ru',             // Основной домен
+  'https://www.blinkmind.ru',         // WWW домен
+  'https://blink-site-1.vercel.app'   // Vercel домен
 ].filter(Boolean)
 
 // Middleware
