@@ -46,9 +46,62 @@
   color: var(--color-primary);
 }
 
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
 .header-cta {
   padding: 12px 24px;
   font-size: 0.9rem;
+}
+
+/* ===== Social Links ===== */
+.social-links {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.social-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--color-gray);
+  transition: var(--transition);
+}
+
+.social-link:hover {
+  background: rgba(178, 241, 66, 0.1);
+  border-color: rgba(178, 241, 66, 0.3);
+  color: var(--color-primary);
+  transform: translateY(-2px);
+}
+
+.social-link svg {
+  flex-shrink: 0;
+}
+
+.cta-with-social {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.final-cta .cta-with-social {
+  justify-content: center;
+}
+
+.footer-social {
+  margin-top: 16px;
+  justify-content: center;
 }
 
 @media (max-width: 768px) {
@@ -59,6 +112,40 @@
   .header-cta {
     font-size: 0.85rem;
     padding: 10px 16px;
+  }
+  
+  .header-right {
+    gap: 12px;
+  }
+  
+  .header-right .social-links {
+    gap: 8px;
+  }
+  
+  .header-right .social-link {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .header-right .social-link svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-right .social-links {
+    display: none;
+  }
+  
+  .cta-with-social {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .hero-buttons .social-links {
+    width: 100%;
+    justify-content: center;
   }
 }
 
@@ -701,6 +788,11 @@
   font-size: 2rem;
 }
 
+.how-it-works-cta {
+  text-align: center;
+  margin-top: 48px;
+}
+
 @media (max-width: 768px) {
   .step {
     grid-template-columns: 1fr;
@@ -987,6 +1079,16 @@
   gap: 16px;
   justify-content: center;
   flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.quiz-demo-link {
+  display: block;
+  margin-bottom: 20px;
+}
+
+.quiz-social {
+  justify-content: center;
 }
 
 /* Уровни результатов квиза */
